@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
             String response=null;
             try
             {
-                response = NetworkUtils.getItemById(NetworkUtils.LAB_TESTS,"lt_5");
+                response = NetworkUtils.getDiagnosis();
             }
             catch (Exception e)
             {
