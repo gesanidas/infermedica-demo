@@ -49,6 +49,28 @@ public class JsonUtils
     }
 
 
+    public static String parseQuestionText(Context context,String  inputString) throws JSONException
+    {
+        JSONObject json = new JSONObject(inputString);
+        JSONObject question=json.getJSONObject("question");
+        String text=question.getString("text");
+        Log.i("text",text);
+        return text;
+    }
+
+    public ArrayList<String> parseSymptom(Context context,String  inputString) throws JSONException
+    {
+        JSONObject json = new JSONObject(inputString);
+        JSONObject question=json.getJSONObject("question");
+        JSONArray items=question.getJSONArray("items");
+        for (int i=0;i<items.length();i++)
+        {
+            
+        }
+
+    }
+
+
 
 
 
