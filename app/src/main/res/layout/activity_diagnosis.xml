@@ -1,52 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_diagnosis"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.gesanidas.housemd.DiagnosisActivity">
 
     <TextView
         android:text="TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="135dp"
-        android:layout_marginTop="72dp"
-        android:id="@+id/textView" />
+        android:id="@+id/textView"
+        tools:layout_constraintTop_creator="1"
+        tools:layout_constraintRight_creator="1"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="40dp"
+        tools:layout_constraintLeft_creator="1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_bias="0.487"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView2"
+        tools:layout_constraintTop_creator="1"
+        tools:layout_constraintRight_creator="1"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="40dp"
+        tools:layout_constraintLeft_creator="1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintHorizontal_bias="0.487"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp" />
+
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/radio_group"
+
+        android:layout_marginTop="40dp"
+        android:checkedButton="@+id/rb_female"
+        android:orientation="horizontal"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2">
 
 
-    <RadioButton android:id="@+id/radio_unknown"
+        <RadioButton
+            android:id="@+id/radio_yes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Don't know"
+            android:layout_marginStart="10dp"
             android:onClick="onRadioButtonClicked"
-        android:layout_marginEnd="14dp"
-        android:layout_centerVertical="true"
-        android:layout_alignParentEnd="true" />
+            android:text="Yes"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
 
-    <RadioButton android:id="@+id/radio_no"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="No"
-        android:onClick="onRadioButtonClicked"
-        android:layout_alignBaseline="@+id/radio_unknown"
-        android:layout_alignBottom="@+id/radio_unknown"
-        android:layout_alignEnd="@+id/textView" />
 
-    <RadioButton android:id="@+id/radio_yes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Yes"
-        android:onClick="onRadioButtonClicked"
-        android:layout_marginStart="30dp"
-        android:layout_alignBaseline="@+id/radio_no"
-        android:layout_alignBottom="@+id/radio_no"
-        android:layout_alignParentStart="true" />
+            />
 
-</RelativeLayout>
+
+        <RadioButton
+            android:id="@+id/radio_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="46dp"
+            android:onClick="onRadioButtonClicked"
+            android:text="No"
+            app:layout_constraintLeft_toRightOf="@+id/radio_yes"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <RadioButton
+            android:id="@+id/radio_unknown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:onClick="onRadioButtonClicked"
+            android:text="Don't know"
+            app:layout_constraintLeft_toRightOf="@+id/radio_no"
+            app:layout_constraintTop_toTopOf="parent"
+
+
+            />
+
+
+    </RadioGroup>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="368dp"
+        android:layout_height="200dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/radio_group"
+        android:layout_marginTop="40dp"
+        android:id="@+id/condition_recycler"
+
+        />
+
+
+</android.support.constraint.ConstraintLayout>

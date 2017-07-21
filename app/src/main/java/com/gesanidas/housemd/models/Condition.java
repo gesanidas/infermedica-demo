@@ -9,24 +9,21 @@ public class Condition
     String id;
     String name;
     String commonName;
-    String sexFilter;
-    String category;
-    String prevalence;
-    String severity;
-    String triageLevel;
-    String acuteness;
-    String hint;
-    String icd10Code;
+    String probability;
+
 
 
     public Condition() {
     }
 
-    public Condition(String id, String name, String commonName) {
+
+    public Condition(String id, String name, String commonName, String probability) {
         this.id = id;
         this.name = name;
         this.commonName = commonName;
+        this.probability = probability;
     }
+
 
     public String getId() {
         return id;
@@ -52,67 +49,11 @@ public class Condition
         this.commonName = commonName;
     }
 
-    public String getSexFilter() {
-        return sexFilter;
+    public String getProbability() {
+        return probability;
     }
 
-    public void setSexFilter(String sexFilter) {
-        this.sexFilter = sexFilter;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getPrevalence() {
-        return prevalence;
-    }
-
-    public void setPrevalence(String prevalence) {
-        this.prevalence = prevalence;
-    }
-
-    public String getSeverity() {
-        return severity;
-    }
-
-    public void setSeverity(String severity) {
-        this.severity = severity;
-    }
-
-    public String getTriageLevel() {
-        return triageLevel;
-    }
-
-    public void setTriageLevel(String triageLevel) {
-        this.triageLevel = triageLevel;
-    }
-
-    public String getAcuteness() {
-        return acuteness;
-    }
-
-    public void setAcuteness(String acuteness) {
-        this.acuteness = acuteness;
-    }
-
-    public String getHint() {
-        return hint;
-    }
-
-    public void setHint(String hint) {
-        this.hint = hint;
-    }
-
-    public String getIcd10Code() {
-        return icd10Code;
-    }
-
-    public void setIcd10Code(String icd10Code) {
-        this.icd10Code = icd10Code;
+    public void setProbability(String probability) {
+        this.probability = probability;
     }
 }
