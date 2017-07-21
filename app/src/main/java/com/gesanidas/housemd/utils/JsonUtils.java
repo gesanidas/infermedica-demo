@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by ΕΛΙΣΑΒΕΤ on 20/7/2017.
@@ -45,9 +46,9 @@ public class JsonUtils
         }
 
         return symptoms;
-
-
     }
+
+
 
 
 
@@ -87,12 +88,12 @@ public class JsonUtils
         return json;
     }
 
-    public static String getSymptompsFromSymptom(ArrayList<String> symptoms)
+    public static String getSymptompsFromSymptom(HashMap<String,String> symptoms)
     {
         String symp=new String();
-        for (String s:symptoms)
+        for (String s:symptoms.keySet())
         {
-            symp+="\n    {\n\"id\": \""+s+"\",\n      \"choice_id\": \"present\"\n    },";
+            symp+="\n    {\n\"id\": \""+s+"\",\n      \"choice_id\": \""+symptoms.get(s)+"\"\n    },";
         }
         Log.i("opa",symp.substring(0, symp.length() - 1));
         return symp.substring(0, symp.length() - 1);

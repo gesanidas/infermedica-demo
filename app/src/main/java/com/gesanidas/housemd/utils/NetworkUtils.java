@@ -6,6 +6,7 @@ import com.gesanidas.housemd.models.Symptom;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -116,7 +117,7 @@ public class NetworkUtils
     /////////////postrequests
 
 
-    public static String getDiagnosis(String sex, String age, ArrayList<String> mySymptoms)
+    public static String getDiagnosis(String sex, String age, HashMap<String,String> mySymptoms)
     {
         OkHttpClient client = new OkHttpClient();
 

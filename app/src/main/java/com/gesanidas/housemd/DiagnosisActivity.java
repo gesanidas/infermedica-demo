@@ -10,8 +10,11 @@ import android.util.Log;
 
 import com.gesanidas.housemd.utils.JsonUtils;
 import com.gesanidas.housemd.utils.NetworkUtils;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -19,35 +22,25 @@ public class DiagnosisActivity extends AppCompatActivity
 {
     SharedPreferences sharedPreferences;
     FetchDiagnosisTask fetchDiagnosisTask;
-
+    HashMap<String,String> mySyms;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_diagnosis);
+        Gson gson = new Gson();
         sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Set<String> set = sharedPreferences.getStringSet("mySymptomsSet", null);
-        List<String> sample=new ArrayList<>(set);
-        Log.i("first sym",String.valueOf(sample.size()));
+        mySyms=new HashMap<>();
+        String hashMapString = sharedPreferences.getString("mySymsString",null);
+        java.lang.reflect.Type type = new TypeToken<HashMap<String, Object>>(){}.getType();
+        mySyms = gson.fromJson(hashMapString, type);
         fetchDiagnosisTask=new FetchDiagnosisTask();
         fetchDiagnosisTask.execute();
 
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -61,7 +54,7 @@ public class DiagnosisActivity extends AppCompatActivity
             String response=null;
             try
             {
-                response = NetworkUtils.getDiagnosis("male","30",new ArrayList<>(sharedPreferences.getStringSet("mySymptomsSet", null)));
+                response = NetworkUtils.getDiagnosis("male","30",mySyms);
                 Log.i("dfd",response);
             }
             catch (Exception e)
