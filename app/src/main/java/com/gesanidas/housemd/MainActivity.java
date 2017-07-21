@@ -1,31 +1,75 @@
 package com.gesanidas.housemd;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Network;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.gesanidas.housemd.data.SymptomAdapter;
+import com.gesanidas.housemd.models.Symptom;
+import com.gesanidas.housemd.utils.JsonUtils;
 import com.gesanidas.housemd.utils.NetworkUtils;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.HashSet;
+import java.util.Set;
 
-    TextView textView;
+public class MainActivity extends AppCompatActivity implements SymptomAdapter.ListItemClickListener
+{
+
+
+
+    RecyclerView recyclerView;
+    SymptomAdapter symptomAdapter;
+    LinearLayoutManager linearLayoutManager;
     FetchEmployeesTask fetchEmployeesTask;
+    private Symptom[] symptoms;
+    SharedPreferences sharedPreferences;
+    Set<String> mySymptomps;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        textView = (TextView) findViewById(R.id.textView2);
+        sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        mySymptomps=new HashSet<>();
+        recyclerView=(RecyclerView) findViewById(R.id.recycler_view);
+        linearLayoutManager=new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setHasFixedSize(true);
+        symptomAdapter=new SymptomAdapter(symptoms,this);
         fetchEmployeesTask=new FetchEmployeesTask();
+        fetchEmployeesTask.execute();
+        recyclerView.setAdapter(symptomAdapter);
     }
 
 
     public void get(View view)
     {
-        fetchEmployeesTask.execute();
+        Intent intent = new Intent(MainActivity.this,DiagnosisActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onClick(Symptom symptom)
+    {
+        Log.i("s",symptom.getName());
+        SharedPreferences.Editor editor=sharedPreferences.edit();
+        mySymptomps = sharedPreferences.getStringSet("mySymptomsSet", new HashSet<String>());
+        mySymptomps.add(symptom.getId());
+        Log.i("added",symptom.getId());
+        Log.i("size is",String.valueOf(mySymptomps.size()));
+        editor.putStringSet("mySymptomsSet", mySymptomps);
+        editor.commit();
     }
 
 
@@ -39,7 +83,9 @@ public class MainActivity extends AppCompatActivity {
             String response=null;
             try
             {
-                response = NetworkUtils.getDiagnosis();
+                response = NetworkUtils.getAllItems(NetworkUtils.SYMPTOMS);
+                symptoms= JsonUtils.parseJsonForSymptoms(MainActivity.this,response);
+                Log.i("dfd",symptoms[0].getName());
             }
             catch (Exception e)
             {
@@ -55,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
             protected void onPostExecute (String response)
             {
                 super.onPostExecute(response);
-                textView.setText(response);
+                symptomAdapter.setSymptoms(symptoms);
 
             }
 

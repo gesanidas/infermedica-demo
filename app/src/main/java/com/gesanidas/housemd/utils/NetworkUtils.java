@@ -1,12 +1,20 @@
 package com.gesanidas.housemd.utils;
 
+import android.util.Log;
+
 import com.gesanidas.housemd.models.Symptom;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okio.Buffer;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by ΕΛΙΣΑΒΕΤ on 20/7/2017.
@@ -24,7 +32,7 @@ public class NetworkUtils
     public static final String CONDITIONS="conditions";
     public static final String LAB_TESTS="lab_tests";
     public static final String RISK_FACTORS ="risk_factors";
-    public static final String SYMPTOMPS="symptoms";
+    public static final String SYMPTOMS="symptoms";
 
 
 
@@ -108,12 +116,12 @@ public class NetworkUtils
     /////////////postrequests
 
 
-    public static String getDiagnosis(String sex, String age, Symptom[] symptoms)
+    public static String getDiagnosis(String sex, String age, ArrayList<String> mySymptoms)
     {
         OkHttpClient client = new OkHttpClient();
 
         MediaType mediaType = MediaType.parse("application/json");
-        String req=JsonUtils.createJsonForDiagnosis(sex,age,JsonUtils.getSymptompsFromSymptom(symptoms));
+        String req=JsonUtils.createJsonForDiagnosis(sex,age,JsonUtils.getSymptompsFromSymptom(mySymptoms));
         RequestBody body = RequestBody.create(mediaType,req);
         Request request = new Request.Builder()
                 .url("https://api.infermedica.com/v2/diagnosis")
@@ -124,9 +132,12 @@ public class NetworkUtils
                 .addHeader("cache-control", "no-cache")
                 //.addHeader("postman-token", "4b795926-fb02-a2d6-f792-1d591674d246")
                 .build();
+        Log.i("request",stringifyRequestBody(request));
+
         try
         {
             Response response = client.newCall(request).execute();
+            Log.i("diagnosis",String.valueOf(request));
             return response.body().string();
         }
         catch (Exception e)
@@ -134,8 +145,23 @@ public class NetworkUtils
             e.printStackTrace();
         }
 
+
         return null;
 
+    }
+
+    private static String stringifyRequestBody(Request request) {
+        if (request.body() != null) {
+            try {
+                final Request copy = request.newBuilder().build();
+                final Buffer buffer = new Buffer();
+                copy.body().writeTo(buffer);
+                return buffer.readUtf8();
+            } catch (final IOException e) {
+                Log.w(TAG, "Failed to stringify request body: " + e.getMessage());
+            }
+        }
+        return "";
     }
 
 
