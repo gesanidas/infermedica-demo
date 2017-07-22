@@ -1,5 +1,6 @@
 package com.gesanidas.housemd;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,9 +11,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+
+import android.app.SearchManager;
+import android.widget.ArrayAdapter;
+import android.widget.SearchView;
+import android.widget.SearchView.OnQueryTextListener;
+
+
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.gesanidas.housemd.data.SymptomAdapter;
 import com.gesanidas.housemd.models.Symptom;
@@ -22,6 +34,7 @@ import com.google.gson.Gson;
 import com.google.gson.internal.Streams;
 import com.google.gson.reflect.TypeToken;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -37,7 +50,6 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
     FetchEmployeesTask fetchEmployeesTask;
     private Symptom[] symptoms;
     SharedPreferences sharedPreferences;
-    Set<String> mySymptomps;
     HashMap<String,String> mySyms;
 
     @Override
@@ -46,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        mySymptomps=new HashSet<>();
         mySyms=new HashMap<>();
         recyclerView=(RecyclerView) findViewById(R.id.recycler_view);
         linearLayoutManager=new LinearLayoutManager(this);
@@ -62,12 +73,31 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
     public void get(View view)
     {
         Intent intent = new Intent(MainActivity.this,DiagnosisActivity.class);
+        intent.putExtra("hashMap", mySyms);
         startActivity(intent);
     }
+
+
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        mySyms.clear();
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        mySyms.clear();
+    }
+
+
 
     @Override
     public void onClick(Symptom symptom)
     {
+        /*
         Gson gson = new Gson();
         SharedPreferences.Editor editor=sharedPreferences.edit();
         java.lang.reflect.Type type = new TypeToken<HashMap<String, String>>(){}.getType();
@@ -77,9 +107,15 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
         hashMapString = gson.toJson(mySyms);
         editor.putString("mySymsString",hashMapString);
         editor.commit();
+        */
+
+        mySyms.put(symptom.getId(),"present");
 
         Log.i("added",symptom.getId());
         Log.i("size is",String.valueOf(mySyms.size()));
+
+        handleIntent(getIntent());
+
         /*
 
         Log.i("s",symptom.getName());
@@ -91,6 +127,83 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
         editor.commit();
         */
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+        return true;
+    }
+
+    //menu function:implements the user actions through intents or signing out
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case R.id.action_settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+
+    @Override
+    protected void onNewIntent(Intent intent)
+    {
+
+        handleIntent(intent);
+    }
+
+
+    private void handleIntent(Intent intent)
+    {
+        ArrayList<Symptom> searchedSymptoms=new ArrayList<>();
+
+        if (Intent.ACTION_SEARCH.equals(intent.getAction()))
+        {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+
+            for (Symptom s:symptoms)
+            {
+                if (s.getCommonName().contains(query))
+                {
+                    searchedSymptoms.add(s);
+                }
+            }
+        }
+        symptomAdapter.setSymptoms(searchedSymptoms.toArray(new Symptom[searchedSymptoms.size()]));
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     public class FetchEmployeesTask extends AsyncTask<String, String, String>

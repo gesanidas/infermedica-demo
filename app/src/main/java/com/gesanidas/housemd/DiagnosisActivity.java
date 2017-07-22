@@ -1,6 +1,7 @@
 package com.gesanidas.housemd;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -53,11 +54,16 @@ public class DiagnosisActivity extends AppCompatActivity
         radioGroup=(RadioGroup)findViewById(R.id.radio_group);
         Gson gson = new Gson();
         sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        /*
         Set<String> set = sharedPreferences.getStringSet("mySymptomsSet", null);
         mySyms=new HashMap<>();
         String hashMapString = sharedPreferences.getString("mySymsString",null);
         java.lang.reflect.Type type = new TypeToken<HashMap<String, Object>>(){}.getType();
         mySyms = gson.fromJson(hashMapString, type);
+
+        */
+        Intent intent = getIntent();
+        mySyms = (HashMap<String, String>) intent.getSerializableExtra("hashMap");
 
 
 
@@ -126,7 +132,7 @@ public class DiagnosisActivity extends AppCompatActivity
             String text=null;
             try
             {
-                question = NetworkUtils.getDiagnosis("male","30",mySyms);
+                question = NetworkUtils.getDiagnosis(sharedPreferences.getString("sex","male"),sharedPreferences.getString("age","30"),mySyms);
                 text=JsonUtils.parseQuestionText(DiagnosisActivity.this,question);
                 name=JsonUtils.parseQuestionName(DiagnosisActivity.this,question);
             }
@@ -162,16 +168,18 @@ public class DiagnosisActivity extends AppCompatActivity
             String text=null;
             try
             {
-                question = NetworkUtils.getDiagnosis("male","30",mySyms);
+                question = NetworkUtils.getDiagnosis(sharedPreferences.getString("sex","male"),sharedPreferences.getString("age","30"),mySyms);
                 newSymptoms=JsonUtils.parseNewSymptom(DiagnosisActivity.this,question);
                 mySyms.put(newSymptoms.get(0).getId(),params[0]);
+                /*
                 Gson gson = new Gson();
                 SharedPreferences.Editor editor=sharedPreferences.edit();
                 String hashMapString = gson.toJson(mySyms);
                 editor.putString("mySymsString",hashMapString);
                 editor.commit();
+                */
 
-                response = NetworkUtils.getDiagnosis("male","30",mySyms);
+                response = NetworkUtils.getDiagnosis(sharedPreferences.getString("sex","male"),sharedPreferences.getString("age","30"),mySyms);
                 text=JsonUtils.parseQuestionText(DiagnosisActivity.this,response);
                 name=JsonUtils.parseQuestionName(DiagnosisActivity.this,response);
                 conditions=JsonUtils.parseJsonForConditions(DiagnosisActivity.this,response);
