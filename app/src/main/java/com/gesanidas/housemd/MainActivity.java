@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
@@ -157,6 +158,8 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
                 (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
+        searchView.setQueryHint("Search for a symptom");
+
         return true;
     }
 
@@ -202,10 +205,16 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
                         searchedSymptoms.add(s);
                     }
                 }
-                symptomAdapter.setSymptoms(searchedSymptoms.toArray(new Symptom[searchedSymptoms.size()]));
+                if (searchedSymptoms.isEmpty())
+                {
+                    Toast.makeText(MainActivity.this,"We couldn't match your symptom,please pick it from the list below",Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    symptomAdapter.setSymptoms(searchedSymptoms.toArray(new Symptom[searchedSymptoms.size()]));
+                }
 
             }
-
 
         }
 

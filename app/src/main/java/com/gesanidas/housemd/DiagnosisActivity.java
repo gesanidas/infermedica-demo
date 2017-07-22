@@ -72,6 +72,7 @@ public class DiagnosisActivity extends AppCompatActivity
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
         conditionAdapter=new ConditionAdapter(conditions);
+        recyclerView.setAdapter(conditionAdapter);
 
 
 

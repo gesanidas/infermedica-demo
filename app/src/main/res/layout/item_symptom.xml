@@ -9,6 +9,8 @@
         android:text="TextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:paddingStart="20dp"
+        android:paddingTop="10dp"
+        android:textSize="20sp"
         android:id="@+id/sym_view" />
 </LinearLayout>

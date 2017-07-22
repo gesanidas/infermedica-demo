@@ -2,10 +2,14 @@ package com.gesanidas.housemd;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.IntegerRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import java.util.Set;
 
 public class SettingsActivity extends AppCompatActivity
 {
@@ -33,9 +37,17 @@ public class SettingsActivity extends AppCompatActivity
         SharedPreferences.Editor editor=sharedPreferences.edit();
         String sex=editText.getText().toString();
         String age=editText1.getText().toString();
-        editor.putString("sex",sex);
-        editor.putString("age",age);
-        editor.commit();
+
+        if (sex.toLowerCase().equals("male")||sex.toLowerCase().equals("female") && Integer.valueOf(age)>0 &&Integer.valueOf(age)<150&&Integer.valueOf(age)!=null)
+        {
+            editor.putString("sex",sex);
+            editor.putString("age",age);
+            editor.commit();
+        }
+        else
+        {
+            Toast.makeText(SettingsActivity.this,"Please enter valid values",Toast.LENGTH_LONG).show();
+        }
 
     }
 }
