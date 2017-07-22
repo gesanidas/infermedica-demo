@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.net.Network;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
     private Symptom[] symptoms;
     SharedPreferences sharedPreferences;
     HashMap<String,String> mySyms;
+    FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        fab=(FloatingActionButton)findViewById(R.id.sendButton);
         mySyms=new HashMap<>();
         recyclerView=(RecyclerView) findViewById(R.id.recycler_view);
         linearLayoutManager=new LinearLayoutManager(this);
@@ -67,15 +70,30 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
         fetchEmployeesTask=new FetchEmployeesTask();
         fetchEmployeesTask.execute();
         recyclerView.setAdapter(symptomAdapter);
+
+
+        fab.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                if (!mySyms.isEmpty())
+                {
+                    Intent intent = new Intent(MainActivity.this,DiagnosisActivity.class);
+                    intent.putExtra("hashMap", mySyms);
+                    startActivity(intent);
+                }
+                else
+                {
+                    Toast.makeText(MainActivity.this,"You need to pick at least one symptom",Toast.LENGTH_LONG).show();
+                }
+
+            }
+
+        });
     }
 
 
-    public void get(View view)
-    {
-        Intent intent = new Intent(MainActivity.this,DiagnosisActivity.class);
-        intent.putExtra("hashMap", mySyms);
-        startActivity(intent);
-    }
 
 
     @Override
@@ -175,15 +193,21 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
         {
             String query = intent.getStringExtra(SearchManager.QUERY);
 
-            for (Symptom s:symptoms)
+            if(query!=null)
             {
-                if (s.getCommonName().contains(query))
+                for (Symptom s:symptoms)
                 {
-                    searchedSymptoms.add(s);
+                    if (s.getCommonName().contains(query))
+                    {
+                        searchedSymptoms.add(s);
+                    }
                 }
+                symptomAdapter.setSymptoms(searchedSymptoms.toArray(new Symptom[searchedSymptoms.size()]));
+
             }
+
+
         }
-        symptomAdapter.setSymptoms(searchedSymptoms.toArray(new Symptom[searchedSymptoms.size()]));
 
     }
 
