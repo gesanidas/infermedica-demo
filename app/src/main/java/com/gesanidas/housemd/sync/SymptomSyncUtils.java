@@ -70,11 +70,11 @@ public class SymptomSyncUtils
             @Override
             protected Void doInBackground(Void... voids)
             {
-                Uri newsQueryUri= SymptomsContract.SymptomsEntry.CONTENT_URI;
+                Uri symptomsQueryUri= SymptomsContract.SymptomsEntry.CONTENT_URI;
                 String[] projectionColumns={SymptomsContract.SymptomsEntry._ID};
                 String selectionStatement= SymptomsContract.SymptomsEntry.COLUMN_NAME;
 
-                Cursor cursor=context.getContentResolver().query(newsQueryUri,projectionColumns,selectionStatement,null,null);
+                Cursor cursor=context.getContentResolver().query(symptomsQueryUri,projectionColumns,selectionStatement,null,null);
 
                 if (null == cursor || cursor.getCount() == 0)
                 {

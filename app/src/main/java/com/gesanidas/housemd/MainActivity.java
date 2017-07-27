@@ -209,6 +209,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         {
             String query = intent.getStringExtra(SearchManager.QUERY);
 
+            Uri searchedQueryUri= SymptomsContract.SymptomsEntry.CONTENT_URI;
+            String[] projectionColumns={SymptomsContract.SymptomsEntry._ID,SymptomsContract.SymptomsEntry.COLUMN_NAME};
+            String selectionStatement= SymptomsContract.SymptomsEntry.COLUMN_NAME;
+
+            Cursor cursor=getContentResolver().query(searchedQueryUri,projectionColumns,selectionStatement,null,null);
+            cursor.moveToFirst();
+            while (cursor.moveToNext())
+            {
+                if (cursor.getString(1).contains(query))
+                {
+                    String ID=cursor.getString(0);
+                    String NAME=cursor.getString(1);
+                    Symptom symptom=new Symptom(ID,NAME);
+                    searchedSymptoms.add(symptom);
+
+                }
+            }
+
+            if (searchedSymptoms.isEmpty())
+            {
+                Toast.makeText(MainActivity.this,"We couldn't match your symptom,please pick it from the list below",Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                //symptomAdapter.setSymptoms(searchedSymptoms.toArray(new Symptom[searchedSymptoms.size()]));
+            }
+
+
 
             //FetchParsingTask fetchParsingTask=new FetchParsingTask();
             //fetchParsingTask.execute(query);
