@@ -1,8 +1,10 @@
 package com.gesanidas.housemd.utils;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.util.Log;
 
+import com.gesanidas.housemd.data.SymptomsContract;
 import com.gesanidas.housemd.models.Condition;
 import com.gesanidas.housemd.models.Symptom;
 
@@ -47,6 +49,48 @@ public class JsonUtils
         }
 
         return symptoms;
+    }
+
+
+    public static ContentValues[] getContentValues(Context context, String inputJsonStr) throws JSONException
+    {
+        final String ID="id";
+        final String NAME="name";
+        final String COMMON_NAME="common_name";
+        final String SEX_FILTER="sex_filter";
+        final String CATEGORY="category";
+        final String SERIOUSNESS="seriousness";
+
+        JSONArray data=new JSONArray(inputJsonStr);
+
+        ContentValues[] contentNewsValues=new ContentValues[data.length()];
+
+
+        for (int i=0;i<data.length();i++)
+        {
+            String id,name,commonName,sexFilter,category,seriousness;
+            JSONObject article = data.getJSONObject(i);
+            id=article.getString(ID);
+            name=article.getString(NAME);
+            commonName=article.getString(COMMON_NAME);
+            sexFilter=article.getString(SEX_FILTER);
+            category=article.getString(CATEGORY);
+            seriousness=article.getString(SERIOUSNESS);
+            ContentValues contentValues = new ContentValues();
+
+            Log.i("tg","writting");
+            contentValues.put(SymptomsContract.SymptomsEntry.COLUMN_ID,id);
+            contentValues.put(SymptomsContract.SymptomsEntry.COLUMN_NAME,name);
+            contentValues.put(SymptomsContract.SymptomsEntry.COLUMN_COMMON_NAME,commonName);
+            contentValues.put(SymptomsContract.SymptomsEntry.COLUMN_SEX_FILTER,sexFilter);
+            contentValues.put(SymptomsContract.SymptomsEntry.COLUMN_CATEGORY,category);
+            contentValues.put(SymptomsContract.SymptomsEntry.COLUMN_SERIOUSNESS,seriousness);
+
+            contentNewsValues[i]=contentValues;
+
+        }
+        return contentNewsValues;
+
     }
 
 

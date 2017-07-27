@@ -24,6 +24,13 @@
         </activity>
         <activity android:name=".DiagnosisActivity" />
         <activity android:name=".SettingsActivity" />
+
+        <provider
+            android:name="com.gesanidas.housemd.data.SymptomsContentProvider"
+            android:authorities="com.gesanidas.housemd"
+            android:exported="false"/>
+
+
     </application>
     <meta-data android:name="android.app.default_searchable"
         android:value=".MainActivity" />

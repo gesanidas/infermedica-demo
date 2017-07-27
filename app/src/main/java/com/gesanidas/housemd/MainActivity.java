@@ -1,14 +1,21 @@
 package com.gesanidas.housemd;
 
 import android.app.SearchManager;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Network;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -34,6 +41,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gesanidas.housemd.data.SymptomAdapter;
+import com.gesanidas.housemd.data.SymptomsContract;
+import com.gesanidas.housemd.data.SymptomsCursorAdapter;
 import com.gesanidas.housemd.models.Symptom;
 import com.gesanidas.housemd.utils.JsonUtils;
 import com.gesanidas.housemd.utils.NetworkUtils;
@@ -46,16 +55,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity implements SymptomAdapter.ListItemClickListener,NavigationView.OnNavigationItemSelectedListener
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,LoaderManager.LoaderCallbacks<Cursor>,SymptomsCursorAdapter.ListItemClickListener
 {
 
+    private SymptomsCursorAdapter symptomsCursorAdapter;
+    private static final int ID_MOVIE_LOADER = 44;
 
 
     RecyclerView recyclerView;
     SymptomAdapter symptomAdapter;
     LinearLayoutManager linearLayoutManager;
     FetchInitialDiagnosisTask fetchInitialDiagnosisTask;
-    ArrayList<Symptom> symptoms;
+    //ArrayList<Symptom> symptoms;
     ArrayList<Symptom> chosenSymptoms;
 
     SharedPreferences sharedPreferences;
@@ -68,16 +79,27 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
         setContentView(R.layout.activity_main);
         sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         fab=(FloatingActionButton)findViewById(R.id.sendButton);
-        symptoms=new ArrayList<>();
+        //symptoms=new ArrayList<>();
         chosenSymptoms=new ArrayList<>();
         recyclerView=(RecyclerView) findViewById(R.id.recycler_view);
         linearLayoutManager=new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
-        symptomAdapter=new SymptomAdapter(symptoms,this);
+
+
+        //symptomAdapter=new SymptomAdapter(symptoms,this);
+
+        symptomsCursorAdapter=new SymptomsCursorAdapter(MainActivity.this,this);
+
+
+
         fetchInitialDiagnosisTask=new FetchInitialDiagnosisTask();
         fetchInitialDiagnosisTask.execute();
-        recyclerView.setAdapter(symptomAdapter);
+
+
+        //recyclerView.setAdapter(symptomAdapter);
+        recyclerView.setAdapter(symptomsCursorAdapter);
+        getSupportLoaderManager().initLoader(ID_MOVIE_LOADER, null, this);
 
 
         fab.setOnClickListener(new View.OnClickListener()
@@ -122,6 +144,8 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
     {
         super.onStart();
         chosenSymptoms.clear();
+        getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
+
     }
 
     @Override
@@ -133,18 +157,32 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
 
 
 
+
     @Override
-    public void onClick(Symptom symptom)
+    public void onClick(int id)
     {
-        symptom.setChoiceID("present");
+
+
+        Uri uriForSymptomClicked = SymptomsContract.SymptomsEntry.buildSymptomsUri(id);
+        Log.i("uri",uriForSymptomClicked.toString());
+
+        final String[] SYMPTOMS_LIST={SymptomsContract.SymptomsEntry.COLUMN_ID, SymptomsContract.SymptomsEntry.COLUMN_NAME};
+
+
+
+        Cursor data= getContentResolver().query(uriForSymptomClicked, SYMPTOMS_LIST, null, null, null);
+        Log.i("cursor size",data.getString(0));
+
+        String ID=data.getString(0);
+        String NAME=data.getString(1);
+        Symptom symptom=new Symptom(ID,NAME);
         chosenSymptoms.add(symptom);
-
-
-
-        handleIntent(getIntent());
-
+        data.close();
 
     }
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
@@ -195,8 +233,8 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
             String query = intent.getStringExtra(SearchManager.QUERY);
 
 
-            FetchParsingTask fetchParsingTask=new FetchParsingTask();
-            fetchParsingTask.execute(query);
+            //FetchParsingTask fetchParsingTask=new FetchParsingTask();
+            //fetchParsingTask.execute(query);
 
 
             /*
@@ -266,6 +304,77 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
 
 
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args)
+    {
+        return new AsyncTaskLoader<Cursor>(this)
+        {
+            Cursor symptoms=null;
+
+
+            @Override
+            public void onStartLoading()
+            {
+                if (symptoms != null)
+                {
+                    Log.i("tag","delievered");
+                    deliverResult(symptoms);
+                }
+                else
+                {
+                    Log.i("tag","not delievered");
+                    forceLoad();
+                }
+            }
+            @Override
+            public Cursor loadInBackground()
+            {
+
+
+                try
+                {
+                    symptoms=getContentResolver().query(SymptomsContract.SymptomsEntry.CONTENT_URI,null,null,null,null);
+                    return symptoms;
+
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+
+
+            public void deliverResult(Cursor data)
+            {
+                symptoms = data;
+                super.deliverResult(data);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data)
+    {
+        if (data != null)
+        {
+            symptomsCursorAdapter.swapCursor(data);
+
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader)
+    {
+        symptomsCursorAdapter.swapCursor(null);
+    }
+
+
+
+
+
+
 
 
 
@@ -289,7 +398,15 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
             try
             {
                 response = NetworkUtils.getAllItems(NetworkUtils.SYMPTOMS);
-                symptoms= JsonUtils.parseJsonForSymptoms(MainActivity.this,response);
+                ContentValues[] cv= JsonUtils.getContentValues(MainActivity.this,response);
+                if (cv!=null && cv.length!=0)
+                {
+                    ContentResolver contentResolver=MainActivity.this.getContentResolver();
+                    //contentResolver.delete(SymptomsContract.SymptomsEntry.CONTENT_URI,null,null);
+                    contentResolver.bulkInsert(SymptomsContract.SymptomsEntry.CONTENT_URI, cv);
+                }
+
+                //symptoms= JsonUtils.parseJsonForSymptoms(MainActivity.this,response);
             }
             catch (Exception e)
             {
@@ -305,7 +422,7 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
             protected void onPostExecute (String response)
             {
                 super.onPostExecute(response);
-                symptomAdapter.setSymptoms(symptoms);
+                //symptomAdapter.setSymptoms(symptoms);
 
             }
 
@@ -322,7 +439,7 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
             try
             {
                 response = NetworkUtils.parseInput(params[0]);
-                symptoms= JsonUtils.parseForSymptoms(MainActivity.this,response);
+                //symptoms= JsonUtils.parseForSymptoms(MainActivity.this,response);
             }
             catch (Exception e)
             {
@@ -339,9 +456,9 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
         {
             super.onPostExecute(response);
             chosenSymptoms.clear();
-            for (Symptom s:symptoms)
+            //for (Symptom s:symptoms)
             {
-                chosenSymptoms.add(s);
+               // chosenSymptoms.add(s);
             }
 
         }
