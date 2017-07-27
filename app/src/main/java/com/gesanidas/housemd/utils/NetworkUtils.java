@@ -7,6 +7,7 @@ import com.gesanidas.housemd.models.Symptom;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Exchanger;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -117,7 +118,7 @@ public class NetworkUtils
     /////////////postrequests
 
 
-    public static String getDiagnosis(String sex, String age, HashMap<String,String> mySymptoms)
+    public static String getDiagnosis(String sex, String age, ArrayList<Symptom> mySymptoms)
     {
         OkHttpClient client = new OkHttpClient();
 
@@ -151,18 +152,55 @@ public class NetworkUtils
 
     }
 
-    private static String stringifyRequestBody(Request request) {
-        if (request.body() != null) {
-            try {
+    private static String stringifyRequestBody(Request request)
+    {
+        if (request.body() != null)
+        {
+            try
+            {
                 final Request copy = request.newBuilder().build();
                 final Buffer buffer = new Buffer();
                 copy.body().writeTo(buffer);
                 return buffer.readUtf8();
-            } catch (final IOException e) {
+            }
+            catch (final IOException e)
+            {
                 Log.w(TAG, "Failed to stringify request body: " + e.getMessage());
             }
         }
         return "";
+    }
+
+
+    public static String parseInput(String input)
+    {
+        OkHttpClient client = new OkHttpClient();
+
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody body = RequestBody.create(mediaType, "{\n  \"text\": \""+input+"\"\n}");
+        Request request = new Request.Builder()
+                .url("https://api.infermedica.com/v2/parse")
+                .post(body)
+                .addHeader("app-id", APP_ID)
+                .addHeader("app-key", APP_KEY)
+                .addHeader("content-type", "application/json")
+                .addHeader("cache-control", "no-cache")
+                .build();
+        Log.i("request",stringifyRequestBody(request));
+
+        try
+        {
+            Response response = client.newCall(request).execute();
+            Log.i("diagnosis",String.valueOf(request));
+
+            return response.body().string();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+
     }
 
 

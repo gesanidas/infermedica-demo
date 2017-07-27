@@ -10,13 +10,15 @@ import android.widget.TextView;
 import com.gesanidas.housemd.R;
 import com.gesanidas.housemd.models.Symptom;
 
+import java.util.ArrayList;
+
 /**
  * Created by ΕΛΙΣΑΒΕΤ on 21/7/2017.
  */
 
 public class SymptomAdapter extends RecyclerView.Adapter<SymptomAdapter.SymptomAdapterViewHolder>
 {
-    private Symptom[] symptoms;
+    private ArrayList<Symptom> symptoms;
     private final ListItemClickListener  mOnClickListener;
 
 
@@ -26,7 +28,7 @@ public class SymptomAdapter extends RecyclerView.Adapter<SymptomAdapter.SymptomA
     }
 
 
-    public SymptomAdapter(Symptom[] symptoms,ListItemClickListener listItemClickListener)
+    public SymptomAdapter(ArrayList<Symptom> symptoms,ListItemClickListener listItemClickListener)
     {
         this.symptoms=symptoms;
         mOnClickListener=listItemClickListener;
@@ -47,20 +49,22 @@ public class SymptomAdapter extends RecyclerView.Adapter<SymptomAdapter.SymptomA
     @Override
     public void onBindViewHolder(SymptomAdapterViewHolder holder, int position)
     {
-        Symptom symptom=symptoms[position];
+        Symptom symptom=symptoms.get(position);
         holder.textView.setText(symptom.getName());
+
+
     }
 
     @Override
     public int getItemCount()
     {
         if (symptoms!=null)
-            return symptoms.length;
+            return symptoms.size();
         else
             return 0;
     }
 
-    public void setSymptoms(Symptom[] symptoms)
+    public void setSymptoms(ArrayList<Symptom> symptoms)
     {
         this.symptoms=symptoms;
         notifyDataSetChanged();
@@ -100,7 +104,7 @@ public class SymptomAdapter extends RecyclerView.Adapter<SymptomAdapter.SymptomA
         {
 
             int adapterPosition = getAdapterPosition();
-            Symptom symptom = symptoms[adapterPosition];
+            Symptom symptom = symptoms.get(adapterPosition);
             mOnClickListener.onClick(symptom);
 
         }

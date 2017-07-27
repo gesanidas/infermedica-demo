@@ -54,10 +54,11 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
     RecyclerView recyclerView;
     SymptomAdapter symptomAdapter;
     LinearLayoutManager linearLayoutManager;
-    FetchEmployeesTask fetchEmployeesTask;
-    private Symptom[] symptoms;
+    FetchInitialDiagnosisTask fetchInitialDiagnosisTask;
+    ArrayList<Symptom> symptoms;
+    ArrayList<Symptom> chosenSymptoms;
+
     SharedPreferences sharedPreferences;
-    HashMap<String,String> mySyms;
     FloatingActionButton fab;
 
     @Override
@@ -67,14 +68,15 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
         setContentView(R.layout.activity_main);
         sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         fab=(FloatingActionButton)findViewById(R.id.sendButton);
-        mySyms=new HashMap<>();
+        symptoms=new ArrayList<>();
+        chosenSymptoms=new ArrayList<>();
         recyclerView=(RecyclerView) findViewById(R.id.recycler_view);
         linearLayoutManager=new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
         symptomAdapter=new SymptomAdapter(symptoms,this);
-        fetchEmployeesTask=new FetchEmployeesTask();
-        fetchEmployeesTask.execute();
+        fetchInitialDiagnosisTask=new FetchInitialDiagnosisTask();
+        fetchInitialDiagnosisTask.execute();
         recyclerView.setAdapter(symptomAdapter);
 
 
@@ -83,10 +85,10 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
             @Override
             public void onClick(View view)
             {
-                if (!mySyms.isEmpty())
+                if (!chosenSymptoms.isEmpty())
                 {
                     Intent intent = new Intent(MainActivity.this,DiagnosisActivity.class);
-                    intent.putExtra("hashMap", mySyms);
+                    intent.putExtra("chosen",chosenSymptoms);
                     startActivity(intent);
                 }
                 else
@@ -119,14 +121,14 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
     protected void onStart()
     {
         super.onStart();
-        mySyms.clear();
+        chosenSymptoms.clear();
     }
 
     @Override
     protected void onResume()
     {
         super.onResume();
-        mySyms.clear();
+        chosenSymptoms.clear();
     }
 
 
@@ -134,35 +136,14 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
     @Override
     public void onClick(Symptom symptom)
     {
-        /*
-        Gson gson = new Gson();
-        SharedPreferences.Editor editor=sharedPreferences.edit();
-        java.lang.reflect.Type type = new TypeToken<HashMap<String, String>>(){}.getType();
-        String hashMapString = sharedPreferences.getString("mySymsString",gson.toJson(new HashMap<String,String>()));
-        mySyms = gson.fromJson(hashMapString, type);
-        if(mySyms!=null) mySyms.put(symptom.getId(),"present");
-        hashMapString = gson.toJson(mySyms);
-        editor.putString("mySymsString",hashMapString);
-        editor.commit();
-        */
+        symptom.setChoiceID("present");
+        chosenSymptoms.add(symptom);
 
-        mySyms.put(symptom.getId(),"present");
 
-        Log.i("added",symptom.getId());
-        Log.i("size is",String.valueOf(mySyms.size()));
 
         handleIntent(getIntent());
 
-        /*
 
-        Log.i("s",symptom.getName());
-        mySymptomps = sharedPreferences.getStringSet("mySymptomsSet", new HashSet<String>());
-        mySymptomps.add(symptom.getId());
-        Log.i("added",symptom.getId());
-        Log.i("size is",String.valueOf(mySymptomps.size()));
-        editor.putStringSet("mySymptomsSet", mySymptomps);
-        editor.commit();
-        */
     }
 
     @Override
@@ -213,6 +194,12 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
         {
             String query = intent.getStringExtra(SearchManager.QUERY);
 
+
+            FetchParsingTask fetchParsingTask=new FetchParsingTask();
+            fetchParsingTask.execute(query);
+
+
+            /*
             if(query!=null)
             {
                 for (Symptom s:symptoms)
@@ -232,6 +219,8 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
                 }
 
             }
+
+            */
 
         }
 
@@ -289,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
 
 
 
-    public class FetchEmployeesTask extends AsyncTask<String, String, String>
+    public class FetchInitialDiagnosisTask extends AsyncTask<String, String, String>
     {
 
         @Override
@@ -301,7 +290,6 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
             {
                 response = NetworkUtils.getAllItems(NetworkUtils.SYMPTOMS);
                 symptoms= JsonUtils.parseJsonForSymptoms(MainActivity.this,response);
-                Log.i("dfd",symptoms[0].getName());
             }
             catch (Exception e)
             {
@@ -320,6 +308,43 @@ public class MainActivity extends AppCompatActivity implements SymptomAdapter.Li
                 symptomAdapter.setSymptoms(symptoms);
 
             }
+
+    }
+
+    public class FetchParsingTask extends AsyncTask<String, String, String>
+    {
+
+        @Override
+        protected String doInBackground(String... params)
+        {
+
+            String response=null;
+            try
+            {
+                response = NetworkUtils.parseInput(params[0]);
+                symptoms= JsonUtils.parseForSymptoms(MainActivity.this,response);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            return response;
+        }
+
+
+
+
+        @Override
+        protected void onPostExecute (String response)
+        {
+            super.onPostExecute(response);
+            chosenSymptoms.clear();
+            for (Symptom s:symptoms)
+            {
+                chosenSymptoms.add(s);
+            }
+
+        }
 
     }
 }

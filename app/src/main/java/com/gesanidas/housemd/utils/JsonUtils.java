@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.gesanidas.housemd.models.Condition;
-import com.gesanidas.housemd.models.NewSymptom;
 import com.gesanidas.housemd.models.Symptom;
 
 import org.json.JSONArray;
@@ -20,7 +19,7 @@ import java.util.HashMap;
 
 public class JsonUtils
 {
-    public static Symptom[] parseJsonForSymptoms(Context context,String  inputString) throws JSONException
+    public static ArrayList<Symptom> parseJsonForSymptoms(Context context,String  inputString) throws JSONException
     {
         final String ID="id";
         final String NAME="name";
@@ -30,7 +29,7 @@ public class JsonUtils
         final String SERIOUSNESS="seriousness";
 
         JSONArray data=new JSONArray(inputString);
-        Symptom[] symptoms=new Symptom[data.length()];
+        ArrayList<Symptom> symptoms=new ArrayList<>();
 
         for (int i=0;i<data.length();i++)
         {
@@ -44,7 +43,7 @@ public class JsonUtils
             seriousness=article.getString(SERIOUSNESS);
 
             Symptom symptom=new Symptom(id,name,commonName,sexFilter,category,seriousness);
-            symptoms[i]=symptom;
+            symptoms.add(symptom);
         }
 
         return symptoms;
@@ -91,18 +90,18 @@ public class JsonUtils
     }
 
 
-    public static ArrayList<NewSymptom> parseNewSymptom(Context context, String  inputString) throws JSONException
+    public static ArrayList<Symptom> parseNewSymptom(Context context, String  inputString) throws JSONException
     {
         JSONObject json = new JSONObject(inputString);
         JSONObject question=json.getJSONObject("question");
         JSONArray items=question.getJSONArray("items");
-        ArrayList<NewSymptom> newSymptoms=new ArrayList<>();
+        ArrayList<Symptom> newSymptoms=new ArrayList<>();
         for (int i=0;i<items.length();i++)
         {
             JSONObject sym=items.getJSONObject(i);
             String id=sym.getString("id");
             String name=sym.getString("name");
-            newSymptoms.add(new NewSymptom(id,name));
+            newSymptoms.add(new Symptom(id,name));
 
         }
         return newSymptoms;
@@ -136,6 +135,37 @@ public class JsonUtils
         }
 
         return conditions;
+    }
+
+
+
+
+    public static ArrayList<Symptom> parseForSymptoms(Context context,String  inputString) throws JSONException
+    {
+        final String ID="id";
+        final String NAME="name";
+        final String COMMON_NAME="common_name";
+        final String CHOICE_ID="choice_id";
+
+        JSONObject json = new JSONObject(inputString);
+        JSONArray data=json.getJSONArray("mentions");
+        ArrayList<Symptom> symptoms=new ArrayList<>();
+
+        for (int i=0;i<data.length();i++)
+        {
+            String id,name,commonName,choiceId;
+            JSONObject article = data.getJSONObject(i);
+            id=article.getString(ID);
+            name=article.getString(NAME);
+            commonName=article.getString(COMMON_NAME);
+            choiceId=article.getString(CHOICE_ID);
+
+
+            Symptom symptom=new Symptom(id,name,commonName,choiceId);
+            symptoms.add(symptom);
+        }
+
+        return symptoms;
     }
 
 
@@ -184,12 +214,12 @@ public class JsonUtils
         return json;
     }
 
-    public static String getSymptompsFromSymptom(HashMap<String,String> symptoms)
+    public static String getSymptompsFromSymptom(ArrayList<Symptom> symptoms)
     {
         String symp=new String();
-        for (String s:symptoms.keySet())
+        for (Symptom s:symptoms)
         {
-            symp+="\n    {\n\"id\": \""+s+"\",\n      \"choice_id\": \""+symptoms.get(s)+"\"\n    },";
+            symp+="\n    {\n\"id\": \""+s.getId()+"\",\n      \"choice_id\": \""+s.getChoiceID()+"\"\n    },";
         }
         Log.i("opa",symp.substring(0, symp.length() - 1));
         return symp.substring(0, symp.length() - 1);

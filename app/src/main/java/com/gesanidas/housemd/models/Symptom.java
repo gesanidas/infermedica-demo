@@ -1,10 +1,12 @@
 package com.gesanidas.housemd.models;
 
+import java.io.Serializable;
+
 /**
  * Created by ΕΛΙΣΑΒΕΤ on 20/7/2017.
  */
 
-public class Symptom
+public class Symptom implements Serializable
 {
     String id;
     String name;
@@ -12,6 +14,7 @@ public class Symptom
     String sexFilter;
     String category;
     String seriousness;
+    String choiceID;
 
     public Symptom(String id, String name, String commonName, String sexFilter, String category, String seriousness) {
         this.id = id;
@@ -20,6 +23,27 @@ public class Symptom
         this.sexFilter = sexFilter;
         this.category = category;
         this.seriousness = seriousness;
+    }
+
+
+    public Symptom(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Symptom(String id, String name, String commonName, String choiceID) {
+        this.id = id;
+        this.name = name;
+        this.commonName = commonName;
+        this.choiceID = choiceID;
+    }
+
+    public String getChoiceID() {
+        return choiceID;
+    }
+
+    public void setChoiceID(String choiceID) {
+        this.choiceID = choiceID;
     }
 
     public String getId() {
