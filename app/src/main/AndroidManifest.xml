@@ -30,6 +30,18 @@
             android:authorities="com.gesanidas.housemd"
             android:exported="false"/>
 
+        <service android:name=".sync.SymptomsSyncIntentService"
+            android:exported="false" />
+
+        <service
+            android:name=".sync.SymptomsFirebaseJobService"
+            android:exported="false">
+            <!-- COMPLETED (9) Declare an intent filter with the action ACTION_EXECUTE -->
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
+            </intent-filter>
+        </service>
+
 
     </application>
     <meta-data android:name="android.app.default_searchable"

@@ -1,13 +1,10 @@
 package com.gesanidas.housemd;
 
 import android.app.SearchManager;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.net.Network;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -21,39 +18,26 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-import android.app.SearchManager;
 import android.support.v7.widget.Toolbar;
-import android.widget.ArrayAdapter;
 import android.widget.SearchView;
-import android.widget.SearchView.OnQueryTextListener;
 
 
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gesanidas.housemd.data.SymptomAdapter;
 import com.gesanidas.housemd.data.SymptomsContract;
 import com.gesanidas.housemd.data.SymptomsCursorAdapter;
 import com.gesanidas.housemd.models.Symptom;
-import com.gesanidas.housemd.utils.JsonUtils;
+import com.gesanidas.housemd.sync.SymptomSyncUtils;
 import com.gesanidas.housemd.utils.NetworkUtils;
-import com.google.gson.Gson;
-import com.google.gson.internal.Streams;
-import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,LoaderManager.LoaderCallbacks<Cursor>,SymptomsCursorAdapter.ListItemClickListener
 {
@@ -63,10 +47,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     RecyclerView recyclerView;
-    SymptomAdapter symptomAdapter;
     LinearLayoutManager linearLayoutManager;
-    FetchInitialDiagnosisTask fetchInitialDiagnosisTask;
-    //ArrayList<Symptom> symptoms;
     ArrayList<Symptom> chosenSymptoms;
 
     SharedPreferences sharedPreferences;
@@ -79,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         fab=(FloatingActionButton)findViewById(R.id.sendButton);
-        //symptoms=new ArrayList<>();
         chosenSymptoms=new ArrayList<>();
         recyclerView=(RecyclerView) findViewById(R.id.recycler_view);
         linearLayoutManager=new LinearLayoutManager(this);
@@ -87,17 +67,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         recyclerView.setHasFixedSize(true);
 
 
-        //symptomAdapter=new SymptomAdapter(symptoms,this);
 
         symptomsCursorAdapter=new SymptomsCursorAdapter(MainActivity.this,this);
 
 
+        SymptomSyncUtils.initialize(this);
 
-        fetchInitialDiagnosisTask=new FetchInitialDiagnosisTask();
-        fetchInitialDiagnosisTask.execute();
-
-
-        //recyclerView.setAdapter(symptomAdapter);
         recyclerView.setAdapter(symptomsCursorAdapter);
         getSupportLoaderManager().initLoader(ID_MOVIE_LOADER, null, this);
 
@@ -259,8 +234,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
 
             }
-
             */
+
+
 
         }
 
@@ -379,56 +355,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-
-
-
-
-
-
-
-
-
-
-    public class FetchInitialDiagnosisTask extends AsyncTask<String, String, String>
-    {
-
-        @Override
-        protected String doInBackground(String... params)
-        {
-
-            String response=null;
-            try
-            {
-                response = NetworkUtils.getAllItems(NetworkUtils.SYMPTOMS);
-                ContentValues[] cv= JsonUtils.getContentValues(MainActivity.this,response);
-                if (cv!=null && cv.length!=0)
-                {
-                    ContentResolver contentResolver=MainActivity.this.getContentResolver();
-                    //contentResolver.delete(SymptomsContract.SymptomsEntry.CONTENT_URI,null,null);
-                    contentResolver.bulkInsert(SymptomsContract.SymptomsEntry.CONTENT_URI, cv);
-                }
-
-                //symptoms= JsonUtils.parseJsonForSymptoms(MainActivity.this,response);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-            return response;
-        }
-
-
-
-
-            @Override
-            protected void onPostExecute (String response)
-            {
-                super.onPostExecute(response);
-                //symptomAdapter.setSymptoms(symptoms);
-
-            }
-
-    }
 
     public class FetchParsingTask extends AsyncTask<String, String, String>
     {
