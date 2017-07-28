@@ -153,16 +153,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         Cursor data= getContentResolver().query(uriForSymptomClicked, SYMPTOMS_LIST, null, null, null);
-        data.moveToFirst();
 
-        String ID=data.getString(0);
-        String NAME=data.getString(1);
-        Log.i("id",ID);
+        if( data != null && data.moveToFirst() )
+        {
+            String ID=data.getString(0);
+            String NAME=data.getString(1);
+            Log.i("id",ID);
 
-        Symptom symptom=new Symptom(ID,NAME);
-        symptom.setChoiceID("present");
-        chosenSymptoms.add(symptom);
-        data.close();
+            Symptom symptom=new Symptom(ID,NAME);
+            symptom.setChoiceID("present");
+            chosenSymptoms.add(symptom);
+            data.close();
+        }
+
+
 
     }
 
