@@ -133,6 +133,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
         fab.hide();
         chosenSymptoms.clear();
+        getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
+
     }
 
 
@@ -152,10 +154,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Cursor data= getContentResolver().query(uriForSymptomClicked, SYMPTOMS_LIST, null, null, null);
         data.moveToFirst();
-        Log.i("cursor size",data.getString(0));
 
         String ID=data.getString(0);
         String NAME=data.getString(1);
+        Log.i("id",ID);
+
         Symptom symptom=new Symptom(ID,NAME);
         symptom.setChoiceID("present");
         chosenSymptoms.add(symptom);

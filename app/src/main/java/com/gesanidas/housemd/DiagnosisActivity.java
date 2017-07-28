@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.gesanidas.housemd.data.ConditionAdapter;
 import com.gesanidas.housemd.models.Condition;
+import com.gesanidas.housemd.models.Question;
 import com.gesanidas.housemd.models.Symptom;
 import com.gesanidas.housemd.utils.JsonUtils;
 import com.gesanidas.housemd.utils.NetworkUtils;
@@ -28,6 +29,7 @@ public class DiagnosisActivity extends AppCompatActivity
     SharedPreferences sharedPreferences;
     FetchDiagnosisTask fetchDiagnosisTask;
     PostDiagnosisTask postDiagnosisTask;
+    PostDiagnosisTaskwithQuestion postDiagnosisTaskwithQuestion;
     ArrayList<Symptom> chosenSymptoms;
     TextView textView,textView2;
     String question,name;
@@ -90,18 +92,30 @@ public class DiagnosisActivity extends AppCompatActivity
                 if (checked)
                     postDiagnosisTask=new PostDiagnosisTask();
                     postDiagnosisTask.execute("present");
+
+                    //postDiagnosisTaskwithQuestion=new PostDiagnosisTaskwithQuestion();
+                    //postDiagnosisTaskwithQuestion.execute("present");
+
                     radioGroup.clearCheck();
                     break;
             case R.id.radio_no:
                 if (checked)
                     postDiagnosisTask=new PostDiagnosisTask();
                     postDiagnosisTask.execute("absent");
+
+                    //postDiagnosisTaskwithQuestion=new PostDiagnosisTaskwithQuestion();
+                    //postDiagnosisTaskwithQuestion.execute("absent");
+
                     radioGroup.clearCheck();
                     break;
             case R.id.radio_unknown:
                 if (checked)
                     postDiagnosisTask=new PostDiagnosisTask();
                     postDiagnosisTask.execute("unknown");
+
+                    //postDiagnosisTaskwithQuestion=new PostDiagnosisTaskwithQuestion();
+                    //postDiagnosisTaskwithQuestion.execute("unknown");
+
                     radioGroup.clearCheck();
                     break;
         }
@@ -148,6 +162,7 @@ public class DiagnosisActivity extends AppCompatActivity
     {
 
         ArrayList<Symptom> newSymptoms=new ArrayList<>();
+        Question q;
         @Override
         protected String doInBackground(String... params)
         {
@@ -157,7 +172,11 @@ public class DiagnosisActivity extends AppCompatActivity
             try
             {
                 question = NetworkUtils.getDiagnosis(sharedPreferences.getString("sex","male"),sharedPreferences.getString("age","30"),chosenSymptoms);
+
+
                 newSymptoms=JsonUtils.parseNewSymptom(DiagnosisActivity.this,question);
+
+
 
                 for (Symptom s:newSymptoms)
                 {
@@ -190,8 +209,64 @@ public class DiagnosisActivity extends AppCompatActivity
             textView2.setText(name);
             conditionAdapter.setConditions(conditions);
             recyclerView.setAdapter(conditionAdapter);
+        }
+
+    }
 
 
+    public class PostDiagnosisTaskwithQuestion extends AsyncTask<String, Void, Question>
+    {
+
+        ArrayList<Symptom> newSymptoms=new ArrayList<>();
+        Question question;
+        @Override
+        protected Question doInBackground(String... params)
+        {
+
+            String response;
+            try
+            {
+                response = NetworkUtils.getDiagnosis(sharedPreferences.getString("sex","male"),sharedPreferences.getString("age","30"),chosenSymptoms);
+                question=JsonUtils.getQuestion(DiagnosisActivity.this,response);
+
+
+
+                for (Symptom s:question.getSymptoms())
+                {
+                    s.setChoiceID(params[0]);
+                    chosenSymptoms.add(s);
+                }
+
+
+                /*
+                response = NetworkUtils.getDiagnosis(sharedPreferences.getString("sex","male"),sharedPreferences.getString("age","30"),chosenSymptoms);
+                text=JsonUtils.parseQuestionText(DiagnosisActivity.this,response);
+                name=JsonUtils.parseQuestionName(DiagnosisActivity.this,response);
+                conditions=JsonUtils.parseJsonForConditions(DiagnosisActivity.this,response);
+
+                */
+
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            return question;
+        }
+
+
+
+
+        @Override
+        protected void onPostExecute (Question question)
+        {
+            super.onPostExecute(question);
+            textView.setText(question.getText());
+            ArrayList<Symptom> syms=question.getSymptoms();
+            textView2.setText(syms.get(0).getCommonName());
+            Condition[] cons=(Condition[]) question.getConditions().toArray();
+            conditionAdapter.setConditions(cons);
+            recyclerView.setAdapter(conditionAdapter);
         }
 
     }

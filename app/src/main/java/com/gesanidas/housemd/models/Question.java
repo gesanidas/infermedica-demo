@@ -1,5 +1,7 @@
 package com.gesanidas.housemd.models;
 
+import java.util.ArrayList;
+
 /**
  * Created by gesanidas on 7/28/2017.
  */
@@ -8,8 +10,8 @@ public class Question
 {
     String type;
     String text;
-    Symptom[] items;
-    Condition[] conditions;
+    ArrayList<Symptom> symptoms;
+    ArrayList<Condition> conditions;
 
 
     public Question() {
@@ -19,7 +21,13 @@ public class Question
         this.type = type;
         this.text = text;
     }
-    
+
+    public Question(String type, String text, ArrayList<Symptom> symptoms, ArrayList<Condition> conditions) {
+        this.type = type;
+        this.text = text;
+        this.symptoms = symptoms;
+        this.conditions = conditions;
+    }
 
     public String getType() {
         return type;
@@ -37,19 +45,19 @@ public class Question
         this.text = text;
     }
 
-    public Symptom[] getItems() {
-        return items;
+    public ArrayList<Symptom> getSymptoms() {
+        return symptoms;
     }
 
-    public void setItems(Symptom[] items) {
-        this.items = items;
+    public void setSymptoms(ArrayList<Symptom> symptoms) {
+        this.symptoms = symptoms;
     }
 
-    public Condition[] getConditions() {
+    public ArrayList<Condition> getConditions() {
         return conditions;
     }
 
-    public void setConditions(Condition[] conditions) {
+    public void setConditions(ArrayList<Condition> conditions) {
         this.conditions = conditions;
     }
 }

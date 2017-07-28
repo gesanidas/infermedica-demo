@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.gesanidas.housemd.data.SymptomsContract;
 import com.gesanidas.housemd.models.Condition;
+import com.gesanidas.housemd.models.Question;
 import com.gesanidas.housemd.models.Symptom;
 
 import org.json.JSONArray;
@@ -134,6 +135,53 @@ public class JsonUtils
         }
         return newSymptoms;
     }
+
+
+
+    public static Question getQuestion(Context context, String  inputString) throws JSONException
+    {
+        JSONObject json = new JSONObject(inputString);
+        JSONObject question=json.getJSONObject("question");
+        String type=question.getString("type");
+        String text=question.getString("text");
+
+        JSONArray items=question.getJSONArray("items");
+        ArrayList<Symptom> syms=new ArrayList<>();
+        ArrayList<Condition> cons=new ArrayList<>();
+
+        for (int i=0;i<items.length();i++)
+        {
+            JSONObject sym=items.getJSONObject(i);
+            Symptom s=new Symptom(sym.getString("id"),sym.getString("name"));
+            syms.add(s);
+        }
+
+        JSONArray conditions=question.getJSONArray("conditions");
+        for (int i=0;i<conditions.length();i++)
+        {
+            JSONObject con=conditions.getJSONObject(i);
+            Condition condition=new Condition(con.getString("id"),con.getString("name"),con.getString("common_name"),con.getString("probability"));
+            cons.add(condition);
+
+        }
+        Question q=new Question(type,text,syms,cons);
+        return q;
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 
     public static Condition[] parseJsonForConditions(Context context, String  inputString) throws JSONException    //this is for main activity
