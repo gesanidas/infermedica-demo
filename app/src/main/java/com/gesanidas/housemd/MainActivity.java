@@ -35,6 +35,7 @@ import com.gesanidas.housemd.data.SymptomsContract;
 import com.gesanidas.housemd.data.SymptomsCursorAdapter;
 import com.gesanidas.housemd.models.Symptom;
 import com.gesanidas.housemd.sync.SymptomSyncUtils;
+import com.gesanidas.housemd.utils.JsonUtils;
 import com.gesanidas.housemd.utils.NetworkUtils;
 
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private SymptomsCursorAdapter symptomsCursorAdapter;
     private static final int ID_MOVIE_LOADER = 44;
+    final String[] SYMPTOMS_LIST={SymptomsContract.SymptomsEntry.COLUMN_ID, SymptomsContract.SymptomsEntry.COLUMN_NAME};
 
 
     RecyclerView recyclerView;
@@ -60,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         fab=(FloatingActionButton)findViewById(R.id.sendButton);
+        fab.hide();
         chosenSymptoms=new ArrayList<>();
         recyclerView=(RecyclerView) findViewById(R.id.recycler_view);
         linearLayoutManager=new LinearLayoutManager(this);
@@ -119,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     {
         super.onStart();
         chosenSymptoms.clear();
+        fab.hide();
         getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
 
     }
@@ -127,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume()
     {
         super.onResume();
+        fab.hide();
         chosenSymptoms.clear();
     }
 
@@ -138,10 +143,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     {
 
 
+        fab.show();
         Uri uriForSymptomClicked = SymptomsContract.SymptomsEntry.buildSymptomsUri(id);
         Log.i("uri",uriForSymptomClicked.toString());
 
-        final String[] SYMPTOMS_LIST={SymptomsContract.SymptomsEntry.COLUMN_ID, SymptomsContract.SymptomsEntry.COLUMN_NAME};
 
 
 
@@ -203,29 +208,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void handleIntent(Intent intent)
     {
+
+
         ArrayList<Symptom> searchedSymptoms=new ArrayList<>();
 
         if (Intent.ACTION_SEARCH.equals(intent.getAction()))
         {
             String query = intent.getStringExtra(SearchManager.QUERY);
 
-            Uri searchedQueryUri= SymptomsContract.SymptomsEntry.CONTENT_URI;
+            /*
             String[] projectionColumns={SymptomsContract.SymptomsEntry._ID,SymptomsContract.SymptomsEntry.COLUMN_NAME};
-            String selectionStatement= SymptomsContract.SymptomsEntry.COLUMN_NAME;
 
-            Cursor cursor=getContentResolver().query(searchedQueryUri,projectionColumns,selectionStatement,null,null);
+            Cursor cursor=getContentResolver().query(SymptomsContract.SymptomsEntry.CONTENT_URI,projectionColumns,null,null,null);
             cursor.moveToFirst();
-            while (cursor.moveToNext())
+            do
             {
                 if (cursor.getString(1).contains(query))
                 {
+                    Log.i("cursor name",cursor.getString(1));
                     String ID=cursor.getString(0);
                     String NAME=cursor.getString(1);
                     Symptom symptom=new Symptom(ID,NAME);
                     searchedSymptoms.add(symptom);
 
+
                 }
-            }
+            }while (cursor.moveToNext());
 
             if (searchedSymptoms.isEmpty())
             {
@@ -234,39 +242,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             else
             {
                 //symptomAdapter.setSymptoms(searchedSymptoms.toArray(new Symptom[searchedSymptoms.size()]));
-            }
 
-
-
-            //FetchParsingTask fetchParsingTask=new FetchParsingTask();
-            //fetchParsingTask.execute(query);
-
-
-            /*
-            if(query!=null)
-            {
-                for (Symptom s:symptoms)
+                String searchedNames[] =new String[searchedSymptoms.size()];
+                for (int i=0;i<searchedSymptoms.size();i++)
                 {
-                    if (s.getCommonName().contains(query))
-                    {
-                        searchedSymptoms.add(s);
-                    }
+                    searchedNames[i]=searchedSymptoms.get(i).getName();
                 }
-                if (searchedSymptoms.isEmpty())
-                {
-                    Toast.makeText(MainActivity.this,"We couldn't match your symptom,please pick it from the list below",Toast.LENGTH_LONG).show();
-                }
-                else
-                {
-                    symptomAdapter.setSymptoms(searchedSymptoms.toArray(new Symptom[searchedSymptoms.size()]));
-                }
+                Bundle myBundle=new Bundle();
+                myBundle.putStringArray("projection", SYMPTOMS_LIST);
+                myBundle.putString("selection", SYMPTOMS_LIST[1]);
+                myBundle.putStringArray("selectionArgs", searchedNames);
+                getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER,myBundle,this);
+
 
             }
             */
 
 
+            FetchParsingTask fetchParsingTask = new FetchParsingTask();
+            fetchParsingTask.execute(query);
+
+
 
         }
+
+
+
+
+
+
 
     }
 
@@ -283,7 +287,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(MenuItem item)
+    {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
@@ -311,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args)
+    public Loader<Cursor> onCreateLoader(int id, final Bundle args)
     {
         return new AsyncTaskLoader<Cursor>(this)
         {
@@ -339,7 +344,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 try
                 {
-                    symptoms=getContentResolver().query(SymptomsContract.SymptomsEntry.CONTENT_URI,null,null,null,null);
+                    if (args==null)
+                    {
+                        symptoms=getContentResolver().query(SymptomsContract.SymptomsEntry.CONTENT_URI,null,null,null,null);
+                    }
+                    else
+                    {
+                        symptoms=getContentResolver().query(SymptomsContract.SymptomsEntry.CONTENT_URI,args.getStringArray("projection"),
+                                args.getString("selection"),
+                                args.getStringArray("selectionArgs"),null,null);
+
+                    }
+
                     return symptoms;
 
                 }
@@ -387,6 +403,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public class FetchParsingTask extends AsyncTask<String, String, String>
     {
 
+        ArrayList<Symptom> symptoms=new ArrayList<>();
         @Override
         protected String doInBackground(String... params)
         {
@@ -395,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             try
             {
                 response = NetworkUtils.parseInput(params[0]);
-                //symptoms= JsonUtils.parseForSymptoms(MainActivity.this,response);
+                symptoms= JsonUtils.parseForSymptoms(MainActivity.this,response);
             }
             catch (Exception e)
             {
@@ -412,9 +429,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         {
             super.onPostExecute(response);
             chosenSymptoms.clear();
-            //for (Symptom s:symptoms)
+            for (Symptom s:symptoms)
             {
-               // chosenSymptoms.add(s);
+               chosenSymptoms.add(s);
+            }
+            if (!chosenSymptoms.isEmpty())
+            {
+                fab.show();
             }
 
         }

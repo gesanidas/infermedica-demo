@@ -26,7 +26,7 @@ public class SymptomsSyncTask
             if (cv!=null && cv.length!=0)
             {
                 ContentResolver contentResolver=context.getContentResolver();
-                //contentResolver.delete(SymptomsContract.SymptomsEntry.CONTENT_URI,null,null);
+                contentResolver.delete(SymptomsContract.SymptomsEntry.CONTENT_URI,null,null);
                 contentResolver.bulkInsert(SymptomsContract.SymptomsEntry.CONTENT_URI, cv);
             }
 

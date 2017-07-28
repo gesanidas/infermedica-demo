@@ -2,6 +2,7 @@ package com.gesanidas.housemd.data;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -86,6 +87,7 @@ public class SymptomsCursorAdapter extends RecyclerView.Adapter<SymptomsCursorAd
 
     public class SymptomsCursorAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
+        boolean clicked;
 
         public final TextView textView;
 
@@ -94,13 +96,25 @@ public class SymptomsCursorAdapter extends RecyclerView.Adapter<SymptomsCursorAd
         {
             super(view);
             textView=(TextView)view.findViewById(R.id.sym_view);
+            textView.setBackgroundColor(Color.WHITE);
             view.setOnClickListener(this);
+            clicked=false;
 
         }
 
         @Override
         public void onClick(View view)
         {
+            if(clicked)
+            {
+                textView.setBackgroundColor(Color.WHITE);
+                clicked=false;
+            }
+            else
+            {
+                textView.setBackgroundColor(Color.YELLOW);
+                clicked=true;
+            }
             int adapterPosition=getAdapterPosition();
             mCursor.moveToPosition(adapterPosition);
             int ID =mCursor.getInt(0);

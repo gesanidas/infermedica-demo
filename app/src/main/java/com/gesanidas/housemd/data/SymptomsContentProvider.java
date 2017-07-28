@@ -162,6 +162,7 @@ public class SymptomsContentProvider extends ContentProvider
 
 
 
+
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs)
     {
@@ -172,6 +173,11 @@ public class SymptomsContentProvider extends ContentProvider
 
         switch (match)
         {
+
+            case SYMPTOMS:
+                moviesDeleted = db.delete(SymptomsContract.SymptomsEntry.TABLE_NAME,null , null);
+                break;
+
             case SYMPTOMS_WITH_ID:
 
                 String id = uri.getPathSegments().get(1);

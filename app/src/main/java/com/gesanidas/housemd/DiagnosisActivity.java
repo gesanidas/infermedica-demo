@@ -152,7 +152,7 @@ public class DiagnosisActivity extends AppCompatActivity
         protected String doInBackground(String... params)
         {
 
-            String response=null;
+            String response;
             String text=null;
             try
             {

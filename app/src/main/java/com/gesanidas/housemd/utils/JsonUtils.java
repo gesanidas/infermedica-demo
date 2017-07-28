@@ -78,7 +78,6 @@ public class JsonUtils
             seriousness=article.getString(SERIOUSNESS);
             ContentValues contentValues = new ContentValues();
 
-            Log.i("tg","writting");
             contentValues.put(SymptomsContract.SymptomsEntry.COLUMN_ID,id);
             contentValues.put(SymptomsContract.SymptomsEntry.COLUMN_NAME,name);
             contentValues.put(SymptomsContract.SymptomsEntry.COLUMN_COMMON_NAME,commonName);
@@ -116,25 +115,10 @@ public class JsonUtils
 
 
 
-    public static HashMap<String,String> parseSymptom(Context context,String  inputString) throws JSONException
-    {
-        JSONObject json = new JSONObject(inputString);
-        JSONObject question=json.getJSONObject("question");
-        JSONArray items=question.getJSONArray("items");
-        HashMap<String,String> newSymptoms=new HashMap<>();
-        for (int i=0;i<items.length();i++)
-        {
-            JSONObject sym=items.getJSONObject(i);
-            String id=sym.getString("id");
-            String name=sym.getString("name");
-            newSymptoms.put(id,name);
-
-        }
-        return newSymptoms;
-    }
 
 
-    public static ArrayList<Symptom> parseNewSymptom(Context context, String  inputString) throws JSONException
+
+    public static ArrayList<Symptom> parseNewSymptom(Context context, String  inputString) throws JSONException   //this is for diagnosis activity
     {
         JSONObject json = new JSONObject(inputString);
         JSONObject question=json.getJSONObject("question");
@@ -152,7 +136,7 @@ public class JsonUtils
     }
 
 
-    public static Condition[] parseJsonForConditions(Context context, String  inputString) throws JSONException
+    public static Condition[] parseJsonForConditions(Context context, String  inputString) throws JSONException    //this is for main activity
     {
         final String ID="id";
         final String NAME="name";
@@ -184,7 +168,7 @@ public class JsonUtils
 
 
 
-    public static ArrayList<Symptom> parseForSymptoms(Context context,String  inputString) throws JSONException
+    public static ArrayList<Symptom> parseForSymptoms(Context context,String  inputString) throws JSONException   //this is for the natural langauge in main activity
     {
         final String ID="id";
         final String NAME="name";
